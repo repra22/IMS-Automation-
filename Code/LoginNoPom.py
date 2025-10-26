@@ -48,6 +48,9 @@ login.save_click()
 time.sleep(20)
 
 login.close_me()
+time.sleep(10)
+login.edit_me()
+login.edit_section_double_click()
 
 time.sleep(100)
 

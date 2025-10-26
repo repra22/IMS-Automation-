@@ -24,7 +24,9 @@ class PomLogin:
         self.ledger=(By.ID,"ACCODEInput_0")
         self.dr_amount =(By.XPATH,"//input[@id='DrAmtInput_0']")
         self.save_button=(By.XPATH,"//button[normalize-space(text())='F6 SAVE']")
-        self.close_button = (By.XPATH,"//button[normalize-space(text())='Yes']")
+        self.close_button = (By.XPATH,"//button[normalize-space(text())='No']")
+        self.edits = (By.XPATH , "//button[normalize-space(text())='EDIT']")
+        self.edit_click = (By.XPATH , "//div[normalize-space(text())='07/17/2025']")
 
         #Actions
 
@@ -101,3 +103,13 @@ class PomLogin:
     def close_me(self):
         self.wait.until(EC.element_to_be_clickable(self.close_button)).click()
         print("Enter close button ")
+
+    def edit_me(self):
+        self.wait.until(EC.element_to_be_clickable(self.edits)).click()
+        print("Click edit Button")
+
+    def edit_section_double_click(self):
+        element = self.wait.until(EC.element_to_be_clickable(self.edit_click))
+        self.actions.double_click(element).perform()
+
+
