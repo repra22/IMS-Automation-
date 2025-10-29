@@ -1,26 +1,33 @@
+# test_login.py
 import pytest
 import allure
-from PyTest_allure.Pages.login import LoginPage
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from PyTest_allure.Pages.login import Login  # the Page Object class
+from selenium import webdriver
 
-@allure.title("Login Test Using POM")
-@allure.description("This test verifies that user can login successfully or captures a screenshot if login fails.")
-def test_login(setup):
-    driver = setup
-    login = LoginPage(driver)
+@allure.title("Login to IMS Application")
+@allure.description("This test logs into the IMS application using valid credentials and verifies the dashboard.")
+def test_login_to_ims(setup):
+    driver= setup
+    login = Login(driver)
+    login.perform_login("Paras", "Ims@1234")
+    print("Login process completed.")
+    login.perform_logout()
+    print("logged out from the prev session")
+    login.perform_ok()
+    login.click_signin()
+    # Wait for dashboard to load safely
+    wait = WebDriverWait(driver, 30)
+    date_input = wait.until(
+        EC.presence_of_element_located((By.XPATH, "//input[@type='date' and @id='Date']"))
+    )
+    print("Dashboard page loaded successfully!")
 
-    with allure.step("Open login page"):
-        login.open_site("https://redmiims.webredirect.himshang.com.np/")
+    assert date_input, "Date input not found"
 
-    with allure.step("Enter username"):
-        login.enter_username("Rishav")
 
-    with allure.step("Enter password"):
-        login.enter_password("wrongpassword")  # purposely wrong for demo
 
-    with allure.step("Click Sign In"):
-        login.click_sign_in()
-
-    with allure.step("Verify login success"):
-        assert login.verify_login() is True, "Login failed! Wrong credentials."
 
 

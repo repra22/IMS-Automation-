@@ -1,35 +1,30 @@
-import allure
 import pytest
+import allure
 from selenium import webdriver
-
-@pytest.fixture
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service
+@pytest.fixture(scope="session")
 def setup():
-    driver = webdriver.Chrome()
+    """Setup Chrome driver for tests"""
+    driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()))
     driver.maximize_window()
     yield driver
-
-    if request.node.rep_call.failed:
-        allure.attach(driver.get_screenshot_as_png(),
-                      name=f"Failure Screenshot - {request.node.name}",
-                      attachment_type=allure.attachment_type.PNG)
     driver.quit()
-
-
-
 
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(item, call):
+    """Attach screenshot on failure for Allure"""
     outcome = yield
-    rep = outcome.get_result()
+    report = outcome.get_result()
 
-    # Only take screenshot if the test fails at the "call" stage
-    if rep.when == "call" and rep.failed:
-        driver = getattr(item, "driver", None)
+    if report.when == "call" and report.failed:
+        driver = item.funcargs.get("driver")
         if driver:
-            allure.attach(
-                driver.get_screenshot_as_png(),
-                name=f"Failure Screenshot - {item.name}",
-                attachment_type=allure.attachment_type.PNG
-            )
-
-
+            try:
+                allure.attach(
+                    driver.get_screenshot_as_png(),
+                    name=f"Screenshot_{item.name}",
+                    attachment_type=allure.attachment_type.PNG
+                )
+            except Exception as e:
+                print(f"[Allure Screenshot Error] {e}")

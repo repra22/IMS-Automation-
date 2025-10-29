@@ -1,38 +1,56 @@
-from selenium import webdriver
-import allure
-import pytest
-from selenium.webdriver import ActionChains
+# PYTEST/Login.py
+import time
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.wait import WebDriverWait
+from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.common.exceptions import TimeoutException
 
 
-
-class LoginPage:
-    def __init__(self, driver):
+class Login:
+    def _init_(self, driver):
         self.driver = driver
-        self.wait = WebDriverWait(driver, 30)
-        self.actions = ActionChains(driver)
+        self.wait = WebDriverWait(self.driver, 25)
+        self.actions = ActionChains(self.driver)
 
-        # Locators
-        self.username_field = (By.XPATH, "//input[@formcontrolname='username']")
-        self.password_field = (By.XPATH, "//input[@formcontrolname='password']")
-        self.sign_field = (By.XPATH, "//button[normalize-space(text())='Sign In']")
-        self.re_login = (By.XPATH, "//span[normalize-space(text())='Logout']")
 
-    # Actions
-    def open_site(self, url):
-        self.driver.get(url)
+    def perform_login(self, username, password):
+        self.driver.get("https://redmiims.webredirect.himshang.com.np/#/login")
+        self.wait.until(EC.presence_of_element_located(
+            (By.XPATH, "//input[@placeholder='Username']")  # safer placeholder/XPath
+        )).send_keys(username)
+        self.driver.find_element(By.XPATH, "//input[@placeholder='Password']").send_keys(password)
+        self.driver.find_element(By.XPATH, "//button[normalize-space(text())='Sign In']").click()
 
-    def enter_username(self, username):
-        self.wait.until(EC.visibility_of_element_located(self.username_field)).send_keys(username)
+    def perform_logout(self):
+        try:
+            logout_button = self.wait.until(
+                EC.element_to_be_clickable((By.XPATH, "//button[.//span[text()='Logout']]"))
+            )
+            logout_button.click()
+            print("Logged out successfully.")
 
-    def enter_password(self, password):
-        self.wait.until(EC.visibility_of_element_located(self.password_field)).send_keys(password)
+            # ok_button = self.wait.until(
+            #     EC.element_to_be_clickable((By.XPATH, "//button[text()='OK']"))
+            # )
+            # ok_button.click()
+            # print("Clicked OK on confirmation dialog.")
 
-    def click_sign_in(self):
-        self.wait.until(EC.element_to_be_clickable(self.sign_field)).click()
+        except TimeoutException:
+            print("Logout button or login page not found, skipping logout.")
 
-    def verify_login(self):
-        return self.wait.until(EC.visibility_of_element_located(self.re_login)).is_displayed()
+    def perform_ok(self):
+        ok_button = self.wait.until(
+            EC.element_to_be_clickable((By.XPATH, "//button[@type='button' and normalize-space(text())='OK']"))
+        )
+        ok_button.click()
+        print("Clicked OK on confirmation dialog.")
+
+
+    def click_signin(self):
+        signin_button = self.driver.find_element(
+            By.XPATH, "//button[normalize-space(text())='Sign In']"
+        )
+        signin_button.click()
+        print("login bhayo")
 
